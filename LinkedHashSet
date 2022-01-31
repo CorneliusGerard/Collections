@@ -1,0 +1,284 @@
+// Program to implement a Custom LinkedHashSet
+class CustomLinkedHashSet<T>{
+    private CustomLinkedHashMap<T,obj> CustomLinkedHashMap; // HashSet internally uses a HashMap
+    public CustomLinkedHashSet(){
+        linkedHashMap = new CustomLinkedHashMap();
+    }
+    // These are the functions of the LinkedHashSet
+    public void add(T val){
+        linkedHashMap.put(val,null); // The object parameter is null because hashset only has one set of values
+    }
+    public boolean contains(T obj)
+    {
+        return linkedHashMap.contains(obj);
+    }
+    public void display()
+    {
+        linkedHashMap.displaySet();
+    }
+    public boolean remove(T obj)
+    {
+        return linkedHashMap.remove(obj);
+    }
+}
+class CustomLinkedHashMap<K,V> // This class will denote the functionalities that will happen in the hashmap
+{
+    private Entry<K,V>[] buckets; // Array made for entry of values
+    private int capacity = 4; // Initial capacity for the HashMap
+    // A LinkedHashSet uses a combination of LinkedHashMap and Doubly linked list for its implementation
+    private Entry<K,V> head; // first of doubly linked list
+    private Entry<K,V> tail; // last of doubly linked list
+    class Entry<K,V>
+    {
+        K key;
+        V val;
+        Entry<K,V> next;
+        Entry<K,V> before; // Before and after is to maintain order after insertion and deletion
+        Entry<K,V> after;
+        public Entry(K newkey, V newval, Entry<K,V> newnext){
+            this.newkey = key;
+            this.newval = val;
+            this.newnext = next;
+        }
+    }
+    public CustomLinkedHashMap(){
+        buckets = new Entry[capacity]; // Creates an intital array of given capacity
+    }
+    // These are the functions of the LinkedHashMap
+    public void put(K newkey, V data)
+    {
+        if(newkey == null)
+            return; // It does not store null values
+        int index = hash(newkey);
+        Entry<K,V> newEntry = new Entry<K,V>(newkey,data,null);
+        OrderAfterInsert(newEntry);
+        if(buckets[index] == null){ // If no previous values present
+            buckets[index] = newEntry;
+        }
+        else{
+            Entry<K,V> prev = null;
+            Entry<K,V> curr = buckets[index];
+            while(curr!=null)
+            {
+                if(curr.key.equals(newkey))
+                {
+                    if(prev == null) // to insert node at first
+                        newEntry.next = curr.next;
+                        buckets[index] = newEntry;
+                        return;
+                }
+                else{
+                    newEntry.next = curr.next;
+                    prev.next = newEntry;
+                    return;
+                }
+                prev = curr;
+                curr = curr.next;
+            }
+            prev.next = newEntry;
+        }
+
+    }
+    private void OrderAfterInsert(Entry<K,V> newEntry) // This function is used to maintain insertion order
+    {
+        if(head == null)
+        {
+            head = newEntry;
+            tail = newEntry;
+            return;
+        }
+        if(head.key.equals(newEntry.key)) // if collision takes place at head
+        {
+            deleteFirst(); // These functions will be defined later
+            insertFirst(newEntry);
+            return;
+        }
+        if(tail.key.equals(newEntry.key)) // If collision takes place at tail
+        {
+            deleteLast();
+            insertLast(newEntry);
+            return;
+        }
+        Entry<K,V> beforeDeleteEntry = deleteSpecificEntry(newEntry); // If not head or tail
+        if(beforeDeleteEntry == null)
+        {
+            insertLast(newEntry);
+        }
+        else{
+            insertAfter(beforeDeleteEntry,newEntry);
+        }
+
+    }
+    private void OrderAfterDelete(Entry<K,V> deleteEntry){
+        if(head.key.equals(deleteEntry.key)){
+            deleteFirst();
+            return;
+        }
+        if(tail.key.equals(deleteEntry.key)){
+            deleteLast();
+            return;
+        }
+        deleteSpecificEntry(deleteEntry);
+    }
+    private void insertAfter(Entry<K,V> beforeDeleteEntry, Entry<K,V> newEntry)
+    {
+        Entry<K,V> curr = head;
+        while(curr!=beforeDeleteEntry)
+        {
+            curr = curr.after;
+        }
+        newEntry.after = beforeDeleteEntry.after;
+        beforeDeleteEntry.after.before = newEntry;
+        newEntry before = beforeDeleteEntry;
+        beforeDeleteEntry.after = newEntry;
+    }
+    
+    private void insertFirst(Entry<K,V> newEntry)
+    {
+        if(head == tail)
+        {
+            head = newEntry;
+            tail = newEntry;
+            return;
+        }
+        newEntry.after = head;
+        head.before = newEntry;
+        head = newEntry;
+    }
+    private void insertLast(Entry<K,V> newEntry)
+    {
+        if(head == tail)
+        {
+            head = newEntry;
+            tail = newEntry;
+            return;
+        }
+        tail.after = newEntry;
+        newEntry.before = tail;
+        tail = newEntry;
+    }
+    private void deleteFirst(){
+        if(head == tail)
+        {
+            head = tail = null;
+            return;
+        }
+        head = head.after;
+        head.before = null;
+    }
+    private void deleteLast(){
+        if(head == tail)
+        {
+            head = tail = null;
+            return;
+        }
+        tail = tail.before;
+        tail.after = null;
+        
+    }
+    private Entry<K,V> deleteSpecificEntry(Entry<K,V> newEntry)
+    {
+        Entry<K,V> curr = head;
+        while(!curr.key.equals(newEntry.key)){
+            if(curr.after == null){ // Element not found
+                return null;
+            }
+            curr = curr.after;
+        }
+        Entry<K,V> beforeDeleteEntry = curr.before;
+        curr.before.after = curr.after;
+        curr.after.before = curr.before; // This deletes the entry as pointers are removed
+        return beforeDeleteEntry;
+    }
+    public T get(K key){
+        int index = hash(key);
+        if(buckets[index] == null){
+            return null;
+        }else{
+            Entry<K,V> temp = buckets[index];
+            while(temp!=null)
+            {
+                if(temp.key.equals(key))
+                    return temp.val;
+                temp = temp.next;
+            }
+            return null; // if key is not found
+        }
+    }
+    public boolean remove(K deleteKey){ // remove function for LinkedHashSet
+        int index = hash(deleteKey);
+        if(buckets[index] == null)  // If element not present
+            return false;
+        else{
+            Entry<K,V> prev = null;
+            Entry<K,V> curr = buckets[index];
+            while(curr!=null)
+            {
+                if(curr.key.equals(deleteKey))
+                {
+                    OrderAfterDelete(curr);
+                    if(prev == null){ // deleting first node
+                        buckets[index] = buckets[index].next;
+                        return true;
+                    }
+                    else{
+                        prev.next = curr.next;
+                        return true;
+                    }
+                }
+                prev = curr;
+                curr = curr.next;
+            }
+            return false;
+        }
+    }
+    public void display(){ // display function for LinkedHashMap
+        Entry<K,V> currentEntry = head;
+        while(currentEntry!=null)
+        {
+            System.out.print("{"+currentEntry.key+"="+currentEntry.val+"}"+" ");
+            currentEntry.after = currentEntry.after;
+        }
+    }
+    private int hash(K key){ // To get the hash function value
+        return Math.abs((key.hashCode()))%capacity;
+    }
+    public K contains(K key){
+        int index = hash(key);
+        if(buckets[index] == null){ // If element not present
+            return null;
+        }else{
+            Entry<K,V> temp = buckets[index];
+            while(temp!=null){
+                if(temp.key.equals(key))
+                    return key;
+                temp = temp.next;
+            }
+            return null; // if element not found
+        }
+    }
+    public void displaySet(){ // display function used for LinkedHashSet
+        Entry<K,V> curr = head;
+        while(curr!=null){
+            System.out.print(currentEntry.key+" ");
+            currentEntry = currentEntry.after;
+        }
+
+    }
+
+}
+public class MyLinkedHashSet{
+    public static void main(String args[])
+    {
+        CustomLinkedHashSet<Integer> set = new CustomLinkedHashSet<Integer>();
+        set.add(20);
+        set.add(30);
+        set.add(30);
+        set.add(45);
+        if(set.contains(20))
+        {System.out.println("Yes");}
+        else{System.out.println("No");}
+        set.remove(45);
+        set.display();
+    }
+}
