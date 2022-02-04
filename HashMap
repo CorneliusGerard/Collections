@@ -1,0 +1,167 @@
+import java.util.Objects;
+
+public class KeyClass {
+	private Object key;
+	public KeyClass(Object k){
+		this.key = k;
+	}
+	public boolean equals(Object obj)
+	{
+		if(this == obj)
+			return true;
+		if(obj == null || getClass() != obj.getClass())
+			return false;
+		KeyClass other = (KeyClass) obj;
+		return this.key == other.key;
+		
+	}
+	public Object getKey()
+	{
+		return key;
+	}
+	public int hashCode()
+	{
+		return Objects.hash(key);
+	}
+}
+public class ValueClass {
+	private Object val;
+	public ValueClass(Object v) {
+		this.val = v;
+	}
+	public Object getValue()
+	{
+		return val;
+	}
+	public boolean equals(Object obj)
+	{
+		if(this == obj)
+			return true;
+		if(obj == null || getClass() != obj.getClass())
+			return false;
+		ValueClass other = (ValueClass) obj;
+		return this.val == other.val;	
+	}
+	
+}
+import java.util.LinkedList;
+public class MyHashMap {
+	LinkedList<Entry>[] HashMap = new LinkedList[16]; // initial capacity of a hashmap is 16
+	int size = 0; // An array of linkedlists is used and each linkedlist node acts as a bucket
+	public MyHashMap(){	
+	}
+	public void put(KeyClass key,ValueClass val)
+	{
+		int load = (int)HashMap.length * 3/4; // This gives the load factor of the hashmap which is 75% of its capacity
+		if(size >= load){
+			resize(); // Resizing only occurs when hashmap reaches its load factor
+		}
+		int index = getIndex(key) % HashMap.length; // This is used for indexing
+		if(HashMap[index] == null)
+		{
+			HashMap[index] = new LinkedList<>(); // If the index is not present a new linked list is created which acts as a bucket
+			HashMap[index].add(new Entry(key,val));
+			size++;  // A size variable is used to track size
+			return;
+		}
+		else
+		{
+			for(Entry entry : HashMap[index])
+			{
+				if(entry.key.equals(key))	// If the same key is entried which already exists then the value is updated
+				{
+					entry.val = val;
+					return;
+				}
+			}
+			HashMap[index].add(new Entry(key,val));
+			size++;
+			return;
+		}
+	}
+	public ValueClass get(KeyClass key) {
+		int index = getIndex(key) % HashMap.length;
+		if(HashMap[index] == null)
+			return null;
+		for(Entry entry : HashMap[index])
+		{
+			if(entry.key.equals(key)) // If the key is matched it returns the value present
+				return entry.val;
+		}
+		return null;
+	}
+	public void remove(KeyClass key)
+	{
+		int index = getIndex(key) % HashMap.length;
+		if(key == null)
+			return;
+		if(HashMap[index] == null)
+			return;
+		Entry toRemove = null;	// a variable ToRemove is initialized and set to null
+		for(Entry entry : HashMap[index]) // Iterated through HashMap
+		{
+			if(entry.key.equals(key)) // If key value is matched in entry set then toRemove is set to entry
+				toRemove = entry;
+				break; // After the key is matched we can use break checking other keys in unnecessary
+		}
+		if(toRemove == null)
+			return;
+		HashMap[index].remove(toRemove);
+		size--; // Size is decremented when deleted
+	}
+	public boolean containsKey(KeyClass key)
+	{
+		int index = getIndex(key) % HashMap.length;
+		if(key == null)
+			return false;
+		if(HashMap[index] == null)
+			return false;
+		for(Entry entry : HashMap[index])
+		{
+			if(entry.key.equals(key)) // If key is present returns true
+				return true;
+		}
+		return false;
+	}
+	public void resize()
+	{
+		LinkedList<Entry>[] oldHashMap = HashMap;
+		HashMap = new LinkedList[size*2];	// Once hashmap size is reached it increased twice in size
+		size = 0; // The size of the new Hashmap is set to zero
+		for(int i=0;i<oldHashMap.length;i++)
+		{
+			if(oldHashMap[i] == null)
+				continue;
+			for(Entry entry : oldHashMap[i])
+			{
+				put(entry.key,entry.val); // The values from previous hashmap are added to new one, size is almost incremented since put is called	
+			}
+		}
+				
+	}
+	public int getIndex(KeyClass key)
+	{
+		return key.hashCode(); // This gives hashcode for the object
+	}
+	public int size()
+	{
+		return size;
+	}
+	
+}
+public class HashMapRunner {
+
+	public static void main(String args[])
+	{
+		MyHashMap map = new MyHashMap();
+		map.put(new KeyClass(001),new ValueClass("Neil"));
+		map.put(new KeyClass(002),new ValueClass("Ram"));
+		map.put(new KeyClass(003),new ValueClass("Subhas"));
+		map.remove(new KeyClass(002));
+		System.out.println(map.containsKey(new KeyClass(001)));
+		System.out.println(map.get(new KeyClass(001)).getValue());
+		System.out.println(map.get(new KeyClass(003)).getValue());
+		
+		
+	}
+}
