@@ -1,0 +1,165 @@
+// Custom Implementation of HashSet
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+import MyHashSet.HashSetIterator;
+
+public class MyHashSet {
+    private Node[] buckets;
+    private int Size;
+    private int current;
+
+    public MyHashSet(int bucketsLength) { // Initial capacity given which is usually 16
+        buckets = new Node[bucketsLength];
+        Size = 0;
+    }
+
+    public boolean contains(Object x) {
+        while (node != null) {
+            if (node.data.equals(x))
+                return true;
+            node = node.next;
+        }
+        return false;
+        // returns true if value is present
+    }
+
+    public boolean add(Object x) {
+        int key = gethashcode(x);
+        Node node = buckets[key]; // Stores in index based on hashKey
+        while (node != null) {
+            if (node.data.equals(x)) {
+                return false; // If element is already present then gives false - duplicates are not allowed
+            }
+
+        }
+
+        if (buckets[current] == null) { // If the bucket is empty
+            node = new Node(x);
+            current = key;
+            buckets[key] = node;
+            Size++;
+        } else { // If values are already present
+            node = new Node(x);
+            node.next = buckets[current];
+            current = key;
+            buckets[key] = node;
+            Size++;
+        }
+        System.out.println("add successful " + x);
+        System.out.println(" size " + currentSize + " rehash " + buckets.length * 0.75);
+        int load = (int) buckets.lenght * 3 / 4;
+        if (currentSize >= load) { // load capacity is generally 0.75 of the total capacity
+            rehash();
+        }
+        return true;
+    }
+
+    private void rehash() {
+        Node oldHashSet = buckets[current];
+        Object HashSet[] = new Object[buckets.length];
+        buckets = new Node[2 * buckets.length]; // When load capacity reached a HashSet of twice the length is created
+        currentSize = 0;
+        int i = 0;
+        while (oldHashSet != null) {
+            HashSet[i] = oldHashSet.data;
+            oldHashSet = oldHashSet.next;
+            i++;
+        }
+        while (i > 0) {
+
+            add(HashSet[--i]); // The values of the old HashSet are emptied into the new HashSet
+
+        }
+    }
+
+    public void remove(Object x) {
+        while (node != null) {
+            if (node.next.data.equals(x)) {
+                node.next = node.next.next;
+                return true;
+            }
+            node = node.next;
+        }
+        return false; // If element not present
+    }
+
+    public int gethashcode(Object x) {
+        int hc = x.hashCode();
+        return (hc % buckets.length); // Gives the hashcode value for indexing
+    }
+
+    public Iterator<Object> iterator() {
+        Iterator<Object> i = new HashSetIterator();
+        return i;
+        // Used for iterating through HashSet
+    }
+
+    public int size() {
+        return currentSize;
+        // Used for checking the capacity
+    }
+
+    public int getlength() {
+        return buckets.length;
+        // Used to get the lenght of the buckets
+    }
+
+    class Node {
+
+        public Object data;
+        public Node next;
+
+        public Node(Object x) {
+            data = x;
+        }
+
+        public String toString() {
+            return data.toString();
+        }
+    }
+
+    class HashSetIterator implements Iterator<Object> { // Own implementation of Iterator
+        private Node currentnode;
+
+        public HashSetIterator() {
+            currentnode = buckets[current];
+        }
+
+        public boolean hasNext() {
+            if (currentnode.next != null)
+                return true;
+            else
+                return false;
+            // reutrns true if next value is present
+        }
+
+        public Object next() {
+            return currentnode.next;
+            // returns the next of current node
+        }
+
+    }
+}
+
+public class HashSetTester {
+    public static void main(String[] args) {
+        MyHashSet set = new MyHashSet(5); // Capacity of HashSet can be initialized here
+        set.add(100);
+        set.add(50);
+        set.add(30);
+        set.add(30);
+        set.add(70);
+        set.remove(50);
+        if (set.contains(70)) {
+            System.out.prinln("Element is present");
+        } else {
+            System.out.println("Element is not present");
+        }
+        HashSetIterator iter = set.iterator();
+        while (iter.hasNext()) {
+            System.out.println(iter.next()); // HashSet displays values based on insertion order
+        }
+
+    }
+}
