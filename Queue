@@ -1,0 +1,66 @@
+public class Qnode<T> {
+    T data;
+    Qnode<T> next;
+
+    Qnode(T data) {
+      this.data = data;
+      this.next = null;
+    }
+  }
+public class MyQueue<T>  {
+	 Qnode<T> front,rear;
+	 public MyQueue() {
+	 front = rear = null;
+	 }
+   public void enqueue(T value) {
+	   Qnode<T> node = new Qnode<T>(value);
+	  
+       if (this.rear == null) {
+           this.front = this.rear = node;
+           return;
+       }
+
+       this.rear.next = node;
+       this.rear = node;
+    }
+    
+     public T dequeue() {
+		if (this.front == null) {
+            System.out.println("Queue is empty");
+            this.rear = null;
+        }
+        T value = front.data;
+        this.front = this.front.next;
+        return value;
+}
+
+public boolean isEmpty() {
+        return front == null;
+    }
+   
+public T peek() {
+        return front.data;
+    }
+}
+public class QueueRunner {
+	public static void main(String args[])
+	{
+		MyQueue<Integer> queue1 = new MyQueue<>();
+		queue1.enqueue(100);
+		queue1.enqueue(250);
+		queue1.enqueue(120);
+		queue1.enqueue(500);
+		MyQueue<Integer> queue2 = new MyQueue<>();
+		queue2.enqueue(100);
+		queue2.enqueue(250);
+		queue2.enqueue(120);
+		if(queue1.equals(queue2))
+		{
+			System.out.println("Queues are equal");
+		}
+		else
+		{
+			System.out.println("They are not equal");
+		}
+	}
+}
