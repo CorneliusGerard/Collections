@@ -1,0 +1,101 @@
+import java.util.ArrayList;
+public class MyStack<T> {
+	ArrayList<T> arr;
+	int top = -1;
+	int size;
+	MyStack(int size)
+	{
+		this.size = size;
+		this.arr = new ArrayList<T>(size);
+	}
+	void push(T val) // Adds element to top
+	{
+		if(top+1 == size) // Overflow condition
+		{
+				System.out.println("Overflow Condition");
+		}
+		else {
+			top+=1;
+			if(arr.size() > top) 
+			{
+				arr.set(top, val);
+			}
+			else {
+				arr.add(val);
+			}
+		}
+	}
+	T peek() // Returns the top element of stack
+	{
+		if(top == -1) {
+			System.out.println("Stack Underflow");
+			return null;
+		}
+		else
+		{
+			return arr.get(top); 
+		}
+	}
+	void pop() // Removes the top element of stack
+	{ 
+		if(top == -1){
+			System.out.println("Stack Underflow");
+		}
+		else
+		{
+			top--;
+		}
+	}
+	boolean empty()
+	{
+		return top == -1; // Gives true if top is -1 (empty)
+	}
+	void printStack() // Prints all elements of Stack from top to bottom
+	{
+		if(top==-1) 
+		{
+			System.out.println("Stack is empty");
+		}
+		else
+		for(int i=top;i>=0;i--)
+			System.out.println(arr.get(i));
+	}
+	public boolean equals(Object obj) {
+		if(obj==this) { // If its compared with itself then return true
+			return true;
+		}
+		if(!(obj instanceof MyStack)) { // Check if its instance of class, null value will also give false
+			return false;
+		}
+		MyStack other = (MyStack) obj;
+		if(this.size!=other.size)
+		{
+			return false;
+		}
+		if(this.equals(null))
+			if(!other.equals(null))
+				return false;
+		return true;
+	}
+}
+public class StackRunner {
+	public static void main(String args[])
+	{
+		MyStack<Integer> stack1 = new MyStack<>(10);// Capacity is given here
+		stack1.push(100);
+		stack1.push(80);
+		stack1.push(70);
+		MyStack<Integer> stack2 = new MyStack<>(10);
+		stack2.push(100);
+		stack2.push(80);
+		stack2.push(70);
+		stack2.push(200);
+		if(stack1.equals(stack2))
+			System.out.println("Stack are equal");
+		else
+			System.out.println("They are not equal");
+		stack1.printStack();
+		System.out.println();
+		stack2.printStack();
+}
+}
